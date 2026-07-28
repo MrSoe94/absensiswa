@@ -718,7 +718,7 @@
                       <div class="space-y-4">
                           <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
                               <p class="text-[10px] uppercase font-bold text-gray-400 mb-2">Absen Datang</p>
-                              <div class="grid grid-cols-2 gap-3">
+                              <div class="grid grid-cols-3 gap-3">
                                   <div>
                                       <label class="block text-xs font-bold text-gray-700 mb-1">Mulai Buka</label>
                                       <input type="time" id="conf_masuk_mulai" name="jam_masuk_mulai" required class="w-full border-gray-300 rounded-lg text-xs p-2 focus:ring-indigo-500 focus:border-indigo-500">
@@ -727,8 +727,12 @@
                                       <label class="block text-xs font-bold text-gray-700 mb-1">Batas Terlambat</label>
                                       <input type="time" id="conf_masuk_akhir" name="jam_masuk_akhir" required class="w-full border-gray-300 rounded-lg text-xs p-2 focus:ring-indigo-500 focus:border-indigo-500">
                                   </div>
+                                  <div>
+                                      <label class="block text-xs font-bold text-gray-700 mb-1">Toleransi Maks</label>
+                                      <input type="time" id="conf_toleransi_masuk" name="jam_toleransi_masuk" required class="w-full border-gray-300 rounded-lg text-xs p-2 focus:ring-red-500 focus:border-red-500">
+                                  </div>
                               </div>
-                              <p class="text-[10px] text-orange-500 mt-1.5"><i class="fas fa-info-circle"></i> Lewat batas ini status: <b>Terlambat</b></p>
+                              <p class="text-[10px] text-orange-500 mt-1.5"><i class="fas fa-info-circle"></i> Lewat <b>Batas Terlambat</b> status: Terlambat. Lewat <b>Toleransi Maks</b>: ditolak.</p>
                           </div>
 
                           <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
@@ -1037,7 +1041,7 @@
     // 0. KONFIGURASI API & HELPER
     // ==========================================================================
     // GANTI URL INI dengan URL deployment Google Apps Script Anda
-    const GAS_DEPLOY_URL = 'https://script.google.com/macros/s/AKfycbwQtqDaaMIk9UzMmsPwfzZOYvxlnjUIckkzkXODK16fJ4jKJYTkzPGpEb-sJDd2MkCn/exec';
+    const GAS_DEPLOY_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
 
     function callGAS(method) {
       var args = Array.prototype.slice.call(arguments, 1);
@@ -1908,6 +1912,7 @@ function loadGuruDashboard() {
                 const conf = res.data;
                 document.getElementById('conf_masuk_mulai').value = conf.jam_masuk_mulai;
                 document.getElementById('conf_masuk_akhir').value = conf.jam_masuk_akhir;
+                document.getElementById('conf_toleransi_masuk').value = conf.jam_toleransi_masuk;
                 document.getElementById('conf_pulang_mulai').value = conf.jam_pulang_mulai;
                 document.getElementById('conf_pulang_akhir').value = conf.jam_pulang_akhir;
             }
@@ -1926,6 +1931,7 @@ function loadGuruDashboard() {
         const newConfig = {
             jam_masuk_mulai: formData.get('jam_masuk_mulai'),
             jam_masuk_akhir: formData.get('jam_masuk_akhir'),
+            jam_toleransi_masuk: formData.get('jam_toleransi_masuk'),
             jam_pulang_mulai: formData.get('jam_pulang_mulai'),
             jam_pulang_akhir: formData.get('jam_pulang_akhir')
         };
