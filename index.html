@@ -1134,7 +1134,7 @@
     // 0. KONFIGURASI API & HELPER
     // ==========================================================================
     // GANTI URL INI dengan URL deployment Google Apps Script Anda
-    const GAS_DEPLOY_URL = 'https://script.google.com/macros/s/AKfycbyJb-1TXfeQe-ic0IxPl5vtusI3IMJRjQRBQMAsF7vcKHwl44YEfbZb1MIrOyakhuF_Tg/exec';
+    const GAS_DEPLOY_URL = 'https://script.google.com/macros/s/AKfycbzM7sBGHJL37IiXQ2J5s6bk5LXamM39nYoNkxhNGoclhkve9wJCEG8MYzRUAPoshleC4g/exec';
 
     function callGAS(method) {
       var args = Array.prototype.slice.call(arguments, 1);
@@ -3367,7 +3367,7 @@ function onScanSuccess(decodedText) {
         var wb = XLSX.utils.book_new();
         var data = [
             ['Nama Lengkap', 'NISN', 'Jenis Kelamin', 'Tanggal Lahir', 'Agama', 'Nama Ayah', 'Nama Ibu', 'No Handphone', 'Kelas', 'Alamat'],
-            ['Ahmad Rizki', '1234567890', 'Laki-laki', '15-05-2008', 'Islam', 'Budi Santoso', 'Siti Aminah', '081234567890', 'VI B', 'Jl. Merdeka No. 10']
+            ['', '', '', '', '', '', '', '', '', '']
         ];
         var ws = XLSX.utils.aoa_to_sheet(data);
         ws['!cols'] = data[0].map(function() { return { wch: 18 }; });
@@ -3412,7 +3412,7 @@ function onScanSuccess(decodedText) {
                     alert('Tidak ada data siswa valid ditemukan.');
                     return;
                 }
-                callGAS('importSiswaBulk', siswaList).then(function(res) {
+                callGAS('importSiswaBulk', currentUser ? currentUser.token : '', siswaList).then(function(res) {
                     hideLoading(); input.value = '';
                     if (res.success) {
                         var msg = 'Import selesai!\nBerhasil: ' + (res.added||0) + ' siswa\nDuplikat/Gagal: ' + (res.skipped||0);
