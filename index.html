@@ -14,6 +14,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <script>
@@ -570,7 +571,13 @@
             <button onclick="refreshData('siswa', this)" class="bg-white text-gray-600 border border-gray-200 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm hover:bg-gray-50 hover:text-indigo-600 transition" title="Perbarui Data">
                 <i class="fas fa-sync-alt"></i>
             </button>
-            
+            <button onclick="downloadTemplateSiswa()" class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm hover:bg-emerald-100 transition">
+                <i class="fas fa-download mr-1"></i> Template
+            </button>
+            <button onclick="document.getElementById('importSiswaInput').click()" class="bg-amber-50 text-amber-700 border border-amber-200 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm hover:bg-amber-100 transition">
+                <i class="fas fa-upload mr-1"></i> Import Excel
+            </button>
+            <input type="file" id="importSiswaInput" accept=".xlsx,.xls" class="hidden" onchange="importSiswaExcel(this)">
             <button onclick="showAddSiswaModal()" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm hover:bg-indigo-700 transition">
                 <i class="fas fa-plus mr-1"></i> Tambah
             </button>
@@ -3354,6 +3361,76 @@ function onScanSuccess(decodedText) {
     
     function showAddGuruModal() { showModal(createGuruModal()); }
     function editGuru(guruData) { showModal(createGuruModal(guruData)); }
+
+    // --- IMPORT SISWA DARI EXCEL ---
+    function downloadTemplateSiswa() {
+        var wb = XLSX.utils.book_new();
+        var data = [
+            ['Nama Lengkap', 'NISN', 'Jenis Kelamin', 'Tanggal Lahir', 'Agama', 'Nama Ayah', 'Nama Ibu', 'No Handphone', 'Kelas', 'Alamat'],
+            ['Ahmad Rizki', '1234567890', 'Laki-laki', '15-05-2008', 'Islam', 'Budi Santoso', 'Siti Aminah', '081234567890', 'VI B', 'Jl. Merdeka No. 10']
+        ];
+        var ws = XLSX.utils.aoa_to_sheet(data);
+        ws['!cols'] = data[0].map(function() { return { wch: 18 }; });
+        XLSX.utils.book_append_sheet(wb, ws, 'Template Siswa');
+        XLSX.writeFile(wb, 'Template_Import_Siswa.xlsx');
+    }
+
+    function importSiswaExcel(input) {
+        var file = input.files[0];
+        if (!file) return;
+        showLoading();
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                var wb = XLSX.read(e.target.result, { type: 'array' });
+                var ws = wb.Sheets[wb.SheetNames[0]];
+                var rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+                if (rows.length < 2) {
+                    hideLoading(); input.value = '';
+                    alert('File kosong atau tidak memiliki data.');
+                    return;
+                }
+                var siswaList = [];
+                for (var i = 1; i < rows.length; i++) {
+                    var r = rows[i];
+                    if (!r[0] && !r[1]) continue;
+                    siswaList.push({
+                        nama: String(r[0] || '').trim(),
+                        nisn: String(r[1] || '').trim(),
+                        jenisKelamin: String(r[2] || '').trim(),
+                        tanggalLahir: String(r[3] || '').trim(),
+                        agama: String(r[4] || '').trim(),
+                        namaAyah: String(r[5] || '').trim(),
+                        namaIbu: String(r[6] || '').trim(),
+                        noHp: String(r[7] || '').trim(),
+                        kelas: String(r[8] || '').trim(),
+                        alamat: String(r[9] || '').trim()
+                    });
+                }
+                if (siswaList.length === 0) {
+                    hideLoading(); input.value = '';
+                    alert('Tidak ada data siswa valid ditemukan.');
+                    return;
+                }
+                callGAS('importSiswaBulk', siswaList).then(function(res) {
+                    hideLoading(); input.value = '';
+                    if (res.success) {
+                        var msg = 'Import selesai!\nBerhasil: ' + (res.added||0) + ' siswa\nDuplikat/Gagal: ' + (res.skipped||0);
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({ icon: 'success', title: 'Import Berhasil', text: msg, timer: 3000, showConfirmButton: false });
+                        } else { alert(msg); }
+                        loadDataSiswa();
+                    } else {
+                        alert('Gagal: ' + res.message);
+                    }
+                }).catch(function(err) { hideLoading(); input.value = ''; alert('Koneksi error: ' + err); });
+            } catch (err) {
+                hideLoading(); input.value = '';
+                alert('Gagal membaca file: ' + err.message);
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    }
 
     function createSiswaModal(s = null) {
         const isEdit = s !== null;
