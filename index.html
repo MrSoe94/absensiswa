@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistem Absensi Pintar</title>
+  <title>V2 Sistem Absensi Pintar</title>
   
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -253,7 +253,7 @@
                           <span class="text-xs font-bold bg-white text-gray-600 px-3 py-1.5 rounded-lg border border-gray-200 shadow-sm">
                               <i class="far fa-clock mr-2"></i> <span id="adminDateDisplay">...</span>
                           </span>
-                          <button onclick="refreshData('dashboard')" class="flex items-center space-x-2 text-xs font-bold text-white bg-indigo-600 border border-indigo-600 px-4 py-2 rounded-lg shadow-md hover:bg-indigo-700 transition transform active:scale-95">
+                          <button onclick="refreshData('dashboard', this)" class="flex items-center space-x-2 text-xs font-bold text-white bg-indigo-600 border border-indigo-600 px-4 py-2 rounded-lg shadow-md hover:bg-indigo-700 transition transform active:scale-95">
                               <i class="fas fa-sync-alt"></i> <span>Refresh Data</span>
                           </button>
                       </div>
@@ -375,7 +375,7 @@
                           <span class="text-xs font-bold bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-lg border border-indigo-100">
                               <i class="far fa-calendar-alt mr-2"></i> <span id="guruDashboardDate">...</span>
                           </span>
-                          <button onclick="refreshData('dashboard')" class="flex items-center space-x-2 text-xs font-bold text-gray-600 bg-white border border-gray-200 px-4 py-2 rounded-lg shadow-sm hover:bg-gray-50 transition">
+                          <button onclick="refreshData('dashboard', this)" class="flex items-center space-x-2 text-xs font-bold text-gray-600 bg-white border border-gray-200 px-4 py-2 rounded-lg shadow-sm hover:bg-gray-50 transition">
                               <i class="fas fa-sync-alt"></i> <span>Refresh</span>
                           </button>
                       </div>
@@ -465,7 +465,7 @@
 
 <div id="view-siswa-dashboard" class="view-section animate-fade-in h-full">
                 <div class="flex justify-end mb-4">
-                    <button onclick="refreshData('dashboard')" class="flex items-center space-x-2 text-xs font-bold text-indigo-600 bg-white border border-indigo-100 px-3 py-1.5 rounded-lg shadow-sm hover:bg-indigo-50 transition">
+                    <button onclick="refreshData('dashboard', this)" class="flex items-center space-x-2 text-xs font-bold text-indigo-600 bg-white border border-indigo-100 px-3 py-1.5 rounded-lg shadow-sm hover:bg-indigo-50 transition">
                         <i class="fas fa-sync-alt"></i> <span>Refresh</span>
                     </button>
                 </div>
@@ -567,7 +567,7 @@
         </div>
         
         <div class="flex items-center gap-2">
-            <button onclick="refreshData('siswa')" class="bg-white text-gray-600 border border-gray-200 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm hover:bg-gray-50 hover:text-indigo-600 transition" title="Perbarui Data">
+            <button onclick="refreshData('siswa', this)" class="bg-white text-gray-600 border border-gray-200 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm hover:bg-gray-50 hover:text-indigo-600 transition" title="Perbarui Data">
                 <i class="fas fa-sync-alt"></i>
             </button>
             
@@ -639,7 +639,7 @@
               <h3 class="font-bold text-sm text-gray-800">Manajemen Guru</h3>
           </div>
           <div class="flex items-center gap-2">
-            <button onclick="refreshData('guru')" class="bg-white text-gray-600 border border-gray-200 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm hover:bg-gray-50 hover:text-purple-600 transition" title="Perbarui Data">
+            <button onclick="refreshData('guru', this)" class="bg-white text-gray-600 border border-gray-200 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm hover:bg-gray-50 hover:text-purple-600 transition" title="Perbarui Data">
                 <i class="fas fa-sync-alt"></i>
             </button>
             
@@ -823,7 +823,7 @@
                     <i class="fas fa-file-excel"></i> <span class="hidden sm:inline">Export Excel</span>
                 </button>
 
-                <button onclick="refreshData('monitoring')" class="bg-white text-gray-600 border border-gray-200 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm hover:bg-gray-50 hover:text-indigo-600 transition" title="Perbarui Data">
+                <button onclick="refreshData('monitoring', this)" class="bg-white text-gray-600 border border-gray-200 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm hover:bg-gray-50 hover:text-indigo-600 transition" title="Perbarui Data">
                     <i class="fas fa-sync-alt"></i>
                 </button>
             </div>
@@ -1041,7 +1041,7 @@
     // 0. KONFIGURASI API & HELPER
     // ==========================================================================
     // GANTI URL INI dengan URL deployment Google Apps Script Anda
-    const GAS_DEPLOY_URL = 'https://script.google.com/macros/s/AKfycbzJz54qQhCA2s3KY3h9RouKRH18UrdDwS_DvcdFBG03Q8Vh9nfvTNOaO9fIDstrcAOm/exec';
+    const GAS_DEPLOY_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
 
     function callGAS(method) {
       var args = Array.prototype.slice.call(arguments, 1);
@@ -1082,10 +1082,27 @@
     let isScanning = false;
     let isSidebarOpen = true; 
     
-    // --- SMART CACHE ---
-    let appCache = {
-        siswa: null,
-        guru: null
+    // --- FRONTEND CACHE (TTL dalam ms) ---
+    const appCache = {
+        _store: {},
+        get: function(key) {
+            const entry = this._store[key];
+            if (!entry) return null;
+            if (Date.now() > entry.expiry) {
+                delete this._store[key];
+                return null;
+            }
+            return entry.data;
+        },
+        set: function(key, data, ttl) {
+            this._store[key] = { data: data, expiry: Date.now() + (ttl || 30000) };
+        },
+        remove: function(key) {
+            delete this._store[key];
+        },
+        clearAll: function() {
+            this._store = {};
+        }
     };
 
     // --- CHART & UTILS ---
@@ -1432,7 +1449,7 @@ function processTableData(type) {
         stopAndBack(false);
         localStorage.removeItem('absensiAppSession');
         currentUser = null;
-        appCache = { siswa: null, guru: null };
+        appCache.clearAll();
         document.getElementById('dashboardContainer').classList.add('hidden');
         document.getElementById('loginPage').classList.remove('hidden');
         
@@ -1550,21 +1567,29 @@ function processTableData(type) {
     // ==========================================================================
     // 6. FUNGSI REFRESH DATA
     // ==========================================================================
-function refreshData(type) {
-        const btnIcon = event ? event.currentTarget.querySelector('i') : null;
+function refreshData(type, el) {
+        const btnIcon = el ? el.querySelector('i') : null;
         if(btnIcon) btnIcon.classList.add('fa-spin');
 
         if (type === 'siswa') {
-            tableState.siswa.fullData = []; // Clear cache
+            tableState.siswa.fullData = [];
             loadDataSiswa();       
             showAlert('success', 'Data siswa diperbarui.');
         } 
         else if (type === 'guru') {
-             tableState.guru.fullData = []; // Clear cache
+             tableState.guru.fullData = [];
             loadDataGuru();        
             showAlert('success', 'Data guru diperbarui.');
         }
         else if (type === 'dashboard') {
+            // Clear dashboard caches
+            appCache.remove('dashboardAdmin');
+            appCache.remove('dashboardGuru_all');
+            const myClass = currentUser && currentUser.role === 'guru' ? currentUser.kelas : null;
+            if (myClass) appCache.remove('dashboardGuru_' + myClass);
+            if (currentUser && currentUser.role === 'siswa') {
+                appCache.remove('siswaDashboard_' + currentUser.nisn);
+            }
             if (currentUser.role === 'admin') loadAdminDashboard();
             else if (currentUser.role === 'guru') loadGuruDashboard();
             else loadSiswaDashboard();
@@ -1572,7 +1597,8 @@ function refreshData(type) {
         }
 
         else if (type === 'monitoring') {
-            tableState.monitoring.fullData = []; 
+            tableState.monitoring.fullData = [];
+            appCache.remove('monitoring');
             loadMonitoringAbsensi(); 
             showAlert('success', 'Data monitoring diperbarui.');
         }
@@ -1590,33 +1616,37 @@ function loadAdminDashboard() {
         setActiveMenu('Dashboard');
         showView('view-admin-dashboard');
         
-        // Update Tanggal Header
         document.getElementById('adminDateDisplay').textContent = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-        // Gunakan getMonitoringRealtime agar data konsisten dengan monitoring
+        const cached = appCache.get('dashboardAdmin');
+        if (cached) {
+            renderDashboardData(cached);
+            return;
+        }
+
         callGAS('getMonitoringRealtime').then(result => {
             if (result.success) {
-                const data = result.data;
-                
-                // 1. Hitung Statistik Global
-                const total = data.length;
-                const hadir = data.filter(d => d.status === 'Hadir').length;
-                const sakit = data.filter(d => d.status === 'Sakit').length;
-                const izin = data.filter(d => d.status === 'Izin').length;
-                const alpa = data.filter(d => d.status === 'Alpa').length;
-                const belum = data.filter(d => d.status === 'Belum Absen').length;
-
-                // 2. Update Small Boxes (Animasi)
-                animateValue("admStatTotal", 0, total, 800);
-                animateValue("admStatHadir", 0, hadir, 800);
-                animateValue("admStatSakit", 0, sakit, 800);
-                animateValue("admStatIzin", 0, izin, 800);
-                animateValue("admStatAlpa", 0, alpa, 800);
-
-                // 3. Render Chart
-                renderAdminChart(hadir, sakit, izin, alpa, belum);
+                appCache.set('dashboardAdmin', result.data, 30000);
+                renderDashboardData(result.data);
             }
         }).catch(() => {});
+    }
+
+    function renderDashboardData(data) {
+        const total = data.length;
+        const hadir = data.filter(d => d.status === 'Hadir').length;
+        const sakit = data.filter(d => d.status === 'Sakit').length;
+        const izin = data.filter(d => d.status === 'Izin').length;
+        const alpa = data.filter(d => d.status === 'Alpa').length;
+        const belum = data.filter(d => d.status === 'Belum Absen').length;
+
+        animateValue("admStatTotal", 0, total, 800);
+        animateValue("admStatHadir", 0, hadir, 800);
+        animateValue("admStatSakit", 0, sakit, 800);
+        animateValue("admStatIzin", 0, izin, 800);
+        animateValue("admStatAlpa", 0, alpa, 800);
+
+        renderAdminChart(hadir, sakit, izin, alpa, belum);
     }
 
     function renderAdminChart(hadir, sakit, izin, alpa, belum) {
@@ -1676,35 +1706,40 @@ function loadGuruDashboard() {
     
     document.getElementById('guruDashboardDate').textContent = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     
-    // Kirim currentUser.kelas sebagai filter
-    // Jika currentUser.kelas kosong (admin/guru umum), maka akan menampilkan semua
     const myClass = currentUser.role === 'guru' ? currentUser.kelas : null;
+    const cacheKey = 'dashboardGuru_' + (myClass || 'all');
+
+    const cached = appCache.get(cacheKey);
+    if (cached) {
+        renderGuruDashboardData(cached, myClass);
+        return;
+    }
 
     callGAS('getMonitoringRealtime', myClass).then(result => {
         if (result.success) {
-            const data = result.data; 
-            // ... (sisa kode sama: hitung statistik & render chart) ...
-            
-            // Tambahan: Ubah judul jika filter aktif
-            if(myClass) {
-                 document.querySelector('#view-guru-dashboard h2').textContent = `Dashboard Guru (${myClass})`;
-            }
-            
-            // ... (lanjutkan kode chart render)
-            const totalSiswa = data.length;
-            const sakit = data.filter(d => d.status === 'Sakit').length;
-            const izin = data.filter(d => d.status === 'Izin').length;
-            const alpa = data.filter(d => d.status === 'Alpa').length;
-            const hadir = data.filter(d => d.status === 'Hadir').length;
-            const belumAbsen = data.filter(d => d.status === 'Belum Absen').length;
-
-            animateValue("statGuruTotal", 0, totalSiswa, 1000);
-            animateValue("statGuruSakit", 0, sakit, 1000);
-            animateValue("statGuruIzin", 0, izin, 1000);
-            animateValue("statGuruAlpa", 0, alpa, 1000);
-            renderGuruChart(hadir, sakit, izin, alpa, belumAbsen);
+            appCache.set(cacheKey, result.data, 30000);
+            renderGuruDashboardData(result.data, myClass);
         }
-    }).catch(() => {}); // Pass Parameter
+    }).catch(() => {});
+}
+
+function renderGuruDashboardData(data, myClass) {
+    if(myClass) {
+         document.querySelector('#view-guru-dashboard h2').textContent = `Dashboard Guru (${myClass})`;
+    }
+    
+    const totalSiswa = data.length;
+    const sakit = data.filter(d => d.status === 'Sakit').length;
+    const izin = data.filter(d => d.status === 'Izin').length;
+    const alpa = data.filter(d => d.status === 'Alpa').length;
+    const hadir = data.filter(d => d.status === 'Hadir').length;
+    const belumAbsen = data.filter(d => d.status === 'Belum Absen').length;
+
+    animateValue("statGuruTotal", 0, totalSiswa, 1000);
+    animateValue("statGuruSakit", 0, sakit, 1000);
+    animateValue("statGuruIzin", 0, izin, 1000);
+    animateValue("statGuruAlpa", 0, alpa, 1000);
+    renderGuruChart(hadir, sakit, izin, alpa, belumAbsen);
 }
 
     // Fungsi Render Chart Guru
@@ -1805,63 +1840,74 @@ function loadGuruDashboard() {
             safeSetText('dashDate', today);
         } catch (e) {}
 
+        const cacheKey = 'siswaDashboard_' + currentUser.nisn;
+        const cached = appCache.get(cacheKey);
+        if (cached) {
+            hideLoading();
+            renderSiswaDashboard(cached);
+            return;
+        }
+
         callGAS('getAbsensiToday', currentUser.nisn).then(result => {
             hideLoading();
-            try {
-                const absensi = result && result.success ? result.data : null;
-                const isLibur = result.isLibur; // Status libur dari server
-                const infoLibur = result.keteranganLibur;
+            appCache.set(cacheKey, result, 15000);
+            renderSiswaDashboard(result);
+        }).catch(error => { hideLoading(); });
+    }
 
-                const elHero = document.getElementById('heroCard');
-                const elBadge = document.getElementById('dashStatusBadge');
-                const elValMasuk = document.getElementById('valMasuk');
-                const elValPulang = document.getElementById('valPulang');
-                const elAlert = document.getElementById('alertBelumAbsen');
+    function renderSiswaDashboard(result) {
+        try {
+            const absensi = result && result.success ? result.data : null;
+            const isLibur = result.isLibur;
+            const infoLibur = result.keteranganLibur;
 
-                // 1. MODE HARI LIBUR
-                if (isLibur) {
-                    if (elHero) elHero.className = "relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-600 to-red-800 p-6 text-white shadow-xl shadow-rose-200 transition-all duration-500 group";
-                    
-                    if (elBadge) {
-                        elBadge.className = "px-4 py-2 rounded-xl bg-white/20 backdrop-blur-md border border-white/20 text-white text-xs font-bold shadow-sm";
-                        elBadge.innerHTML = `<i class="fas fa-calendar-times mr-2"></i> HARI LIBUR`;
-                    }
-                    
-                    if (elValMasuk) {
-                        elValMasuk.parentElement.innerHTML = `
-                            <div class="text-center py-2">
-                                <i class="fas fa-mug-hot text-3xl mb-2 opacity-80"></i>
-                                <p class="text-sm font-bold uppercase tracking-widest">${infoLibur}</p>
-                                <p class="text-[10px] mt-1 opacity-75">Tidak ada absensi hari ini</p>
-                            </div>
-                        `;
-                        if(elValPulang) elValPulang.parentElement.style.display = 'none';
-                        if(elValMasuk) elValMasuk.parentElement.classList.add('col-span-2');
-                    }
+            const elHero = document.getElementById('heroCard');
+            const elBadge = document.getElementById('dashStatusBadge');
+            const elValMasuk = document.getElementById('valMasuk');
+            const elValPulang = document.getElementById('valPulang');
+            const elAlert = document.getElementById('alertBelumAbsen');
 
-                    if (elAlert) { elAlert.classList.add('hidden'); elAlert.classList.remove('flex'); }
-                    return; 
+            if (isLibur) {
+                if (elHero) elHero.className = "relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-600 to-red-800 p-6 text-white shadow-xl shadow-rose-200 transition-all duration-500 group";
+                
+                if (elBadge) {
+                    elBadge.className = "px-4 py-2 rounded-xl bg-white/20 backdrop-blur-md border border-white/20 text-white text-xs font-bold shadow-sm";
+                    elBadge.innerHTML = `<i class="fas fa-calendar-times mr-2"></i> HARI LIBUR`;
+                }
+                
+                if (elValMasuk) {
+                    elValMasuk.parentElement.innerHTML = `
+                        <div class="text-center py-2">
+                            <i class="fas fa-mug-hot text-3xl mb-2 opacity-80"></i>
+                            <p class="text-sm font-bold uppercase tracking-widest">${infoLibur}</p>
+                            <p class="text-[10px] mt-1 opacity-75">Tidak ada absensi hari ini</p>
+                        </div>
+                    `;
+                    if(elValPulang) elValPulang.parentElement.style.display = 'none';
+                    if(elValMasuk) elValMasuk.parentElement.classList.add('col-span-2');
                 }
 
-                // 2. MODE NORMAL (TIDAK LIBUR)
+                if (elAlert) { elAlert.classList.add('hidden'); elAlert.classList.remove('flex'); }
+                return; 
+            }
+
+            if (!absensi) {
+                if (elHero) elHero.className = "relative overflow-hidden rounded-3xl bg-slate-800 p-6 text-white shadow-xl shadow-slate-200 transition-all duration-500 group";
+                if (elBadge) {
+                    elBadge.className = "px-4 py-2 rounded-xl bg-rose-500/20 backdrop-blur-md border border-rose-500/30 text-rose-200 text-xs font-bold shadow-sm animate-pulse";
+                    elBadge.innerHTML = `<i class="fas fa-circle text-[8px] mr-2"></i> BELUM ABSEN`;
+                }
+                if (elValMasuk) elValMasuk.textContent = "--:--";
+                if (elValPulang) elValPulang.textContent = "--:--";
+                if (elAlert) { elAlert.classList.remove('hidden'); elAlert.classList.add('flex'); }
+            } else {
+                if (elAlert) { elAlert.classList.add('hidden'); elAlert.classList.remove('flex'); }
+                if (elValMasuk) elValMasuk.textContent = absensi.jamDatang || "--:--";
                 
-                if (!absensi) {
-                    if (elHero) elHero.className = "relative overflow-hidden rounded-3xl bg-slate-800 p-6 text-white shadow-xl shadow-slate-200 transition-all duration-500 group";
+                if (!absensi.jamPulang) {
+                    if (elHero) elHero.className = "relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-600 to-teal-800 p-6 text-white shadow-xl shadow-emerald-200 transition-all duration-500 group";
                     if (elBadge) {
-                        elBadge.className = "px-4 py-2 rounded-xl bg-rose-500/20 backdrop-blur-md border border-rose-500/30 text-rose-200 text-xs font-bold shadow-sm animate-pulse";
-                        elBadge.innerHTML = `<i class="fas fa-circle text-[8px] mr-2"></i> BELUM ABSEN`;
-                    }
-                    if (elValMasuk) elValMasuk.textContent = "--:--";
-                    if (elValPulang) elValPulang.textContent = "--:--";
-                    if (elAlert) { elAlert.classList.remove('hidden'); elAlert.classList.add('flex'); }
-                } else {
-                    if (elAlert) { elAlert.classList.add('hidden'); elAlert.classList.remove('flex'); }
-                    if (elValMasuk) elValMasuk.textContent = absensi.jamDatang || "--:--";
-                    
-                    if (!absensi.jamPulang) {
-                        if (elHero) elHero.className = "relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-600 to-teal-800 p-6 text-white shadow-xl shadow-emerald-200 transition-all duration-500 group";
-                        if (elBadge) {
-                            elBadge.className = "px-4 py-2 rounded-xl bg-white/20 backdrop-blur-md border border-white/20 text-white text-xs font-bold shadow-sm";
+                        elBadge.className = "px-4 py-2 rounded-xl bg-white/20 backdrop-blur-md border border-white/20 text-white text-xs font-bold shadow-sm";
                             elBadge.innerHTML = `<i class="fas fa-clock animate-pulse mr-2"></i> SEDANG BERLANGSUNG`;
                         }
                         if (elValPulang) elValPulang.textContent = "--:--";
@@ -1878,45 +1924,63 @@ function loadGuruDashboard() {
         }).catch(error => { hideLoading(); });
     }
 
-    // --- KELOLA HARI LIBUR (ADMIN) ---
-// --- KELOLA WAKTU & HARI LIBUR (ADMIN) ---
+    // --- KELOLA WAKTU & HARI LIBUR (ADMIN) ---
     function loadKelolaAbsen() {
         stopAndBack(false);
         setActiveMenu('Kelola Absen');
         showView('view-kelola-absen');
         
-        // 1. Load Data Hari Libur (Seperti Biasa)
         document.getElementById('tbody-libur').innerHTML = '<tr><td colspan="4" class="p-8 text-center text-gray-500"><i class="fas fa-circle-notch fa-spin mr-2"></i>Memuat data...</td></tr>';
-        
-        callGAS('getHariLibur').then(result => {
+
+        const inputs = document.querySelectorAll('#view-kelola-absen input[type="time"]');
+        inputs.forEach(el => el.disabled = true);
+
+        Promise.all([
+            loadHariLibur(),
+            loadGlobalConfig()
+        ]).then(function() {
+            inputs.forEach(el => el.disabled = false);
+        });
+    }
+
+    function loadHariLibur() {
+        const cached = appCache.get('hariLibur');
+        if (cached) {
+            tableState.libur.fullData = cached;
+            processTableData('libur');
+            return Promise.resolve();
+        }
+        return callGAS('getHariLibur').then(function(result) {
             if (result.success) {
+                appCache.set('hariLibur', result.data, 30000);
                 tableState.libur.fullData = result.data;
                 processTableData('libur');
             } else {
                 document.getElementById('tbody-libur').innerHTML = '<tr><td colspan="4" class="p-4 text-center text-red-500">Gagal memuat data.</td></tr>';
             }
-        }).catch(() => {});
-
-        // 2. Load Data Konfigurasi Jam (BARU)
-        loadGlobalConfig();
+        }).catch(function() {});
     }
 
     function loadGlobalConfig() {
-        // Disable input while loading
-        const inputs = document.querySelectorAll('#view-kelola-absen input[type="time"]');
-        inputs.forEach(el => el.disabled = true);
-
-        callGAS('getAppConfig').then(res => {
-            inputs.forEach(el => el.disabled = false);
+        const cached = appCache.get('appConfig');
+        if (cached) {
+            applyConfigToForm(cached);
+            return Promise.resolve();
+        }
+        return callGAS('getAppConfig').then(function(res) {
             if(res.success) {
-                const conf = res.data;
-                document.getElementById('conf_masuk_mulai').value = conf.jam_masuk_mulai;
-                document.getElementById('conf_masuk_akhir').value = conf.jam_masuk_akhir;
-                document.getElementById('conf_toleransi_masuk').value = conf.jam_toleransi_masuk;
-                document.getElementById('conf_pulang_mulai').value = conf.jam_pulang_mulai;
-                document.getElementById('conf_pulang_akhir').value = conf.jam_pulang_akhir;
+                appCache.set('appConfig', res.data, 30000);
+                applyConfigToForm(res.data);
             }
-        }).catch(() => {});
+        }).catch(function() {});
+    }
+
+    function applyConfigToForm(conf) {
+        document.getElementById('conf_masuk_mulai').value = conf.jam_masuk_mulai;
+        document.getElementById('conf_masuk_akhir').value = conf.jam_masuk_akhir;
+        document.getElementById('conf_toleransi_masuk').value = conf.jam_toleransi_masuk;
+        document.getElementById('conf_pulang_mulai').value = conf.jam_pulang_mulai;
+        document.getElementById('conf_pulang_akhir').value = conf.jam_pulang_akhir;
     }
 
     function saveGlobalConfig(e) {
@@ -1940,6 +2004,7 @@ function loadGuruDashboard() {
             btn.disabled = false;
             btn.innerHTML = originalText;
             if(res.success) {
+                appCache.remove('appConfig');
                 showAlert('success', 'Pengaturan waktu berhasil disimpan!');
             } else {
                 showAlert('error', res.message);
@@ -2055,6 +2120,7 @@ function loadGuruDashboard() {
 
             if (res.success) {
                 closeModal();
+                appCache.remove('hariLibur');
                 loadKelolaAbsen(); 
                 showAlert('success', res.message);
             } else {
@@ -2080,6 +2146,7 @@ function loadGuruDashboard() {
         callGAS('addHariLibur', tgl, ket).then(res => {
             hideLoading();
             if (res.success) {
+                appCache.remove('hariLibur');
                 e.target.reset();
                 loadKelolaAbsen();
                 showAlert('success', 'Jadwal libur ditambahkan');
@@ -2094,6 +2161,7 @@ function loadGuruDashboard() {
             showLoading();
             callGAS('deleteHariLibur', tgl).then(res => {
                 hideLoading();
+                appCache.remove('hariLibur');
                 loadKelolaAbsen();
                 showAlert('success', 'Jadwal libur dihapus');
             }).catch(() => {});
@@ -2535,20 +2603,30 @@ function loadMonitoringAbsensi() {
     showView('view-monitoring');
     document.getElementById('monitoringDate').textContent = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     
-    // Tentukan filter kelas
     const myClass = currentUser.role === 'guru' ? currentUser.kelas : null;
+    const cacheKey = 'monitoring' + (myClass ? '_' + myClass : '');
 
     if (tableState.monitoring.fullData.length > 0) {
         processTableData('monitoring');
-    } else {
-        document.getElementById('tbody-monitoring').innerHTML = '<tr><td colspan="6" class="p-8 text-center text-gray-500"><i class="fas fa-circle-notch fa-spin mr-2"></i>Memuat data...</td></tr>';
-        
-        callGAS('getMonitoringRealtime', myClass).then(result => {
-            if (result.success) {
-                tableState.monitoring.fullData = result.data;
-                processTableData('monitoring');
-            } else {
-                document.getElementById('tbody-monitoring').innerHTML = '<tr><td colspan="6" class="p-12 text-center text-gray-400 italic bg-white">Data tidak ditemukan.</td></tr>';
+        return;
+    }
+
+    const cached = appCache.get(cacheKey);
+    if (cached) {
+        tableState.monitoring.fullData = cached;
+        processTableData('monitoring');
+        return;
+    }
+
+    document.getElementById('tbody-monitoring').innerHTML = '<tr><td colspan="6" class="p-8 text-center text-gray-500"><i class="fas fa-circle-notch fa-spin mr-2"></i>Memuat data...</td></tr>';
+    
+    callGAS('getMonitoringRealtime', myClass).then(result => {
+        if (result.success) {
+            appCache.set(cacheKey, result.data, 30000);
+            tableState.monitoring.fullData = result.data;
+            processTableData('monitoring');
+        } else {
+            document.getElementById('tbody-monitoring').innerHTML = '<tr><td colspan="6" class="p-12 text-center text-gray-400 italic bg-white">Data tidak ditemukan.</td></tr>';
             }
         }).catch(() => {});
     }
@@ -2845,6 +2923,13 @@ function onScanSuccess(decodedText) {
         // Kirim decodedText (NISN), myRole, dan myKelas ke Server
         callGAS('scanAbsensi', decodedText, myRole, myKelas).then(result => {
             if (result.success) {
+                // Clear caches yang terdampak oleh scan
+                appCache.remove('dashboardAdmin');
+                appCache.remove('dashboardGuru_all');
+                appCache.remove('dashboardGuru_' + (myKelas || ''));
+                appCache.remove('monitoring');
+                appCache.remove('monitoring_' + (myKelas || ''));
+                appCache.remove('siswaDashboard_' + decodedText);
                 const color = result.type === 'datang' ? 'green' : 'blue';
                 const namaSiswa = result.nama || "Siswa";
                 const kelasSiswa = result.kelas || "";
