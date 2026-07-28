@@ -727,12 +727,8 @@
                                       <label class="block text-xs font-bold text-gray-700 mb-1">Batas Terlambat</label>
                                       <input type="time" id="conf_masuk_akhir" name="jam_masuk_akhir" required class="w-full border-gray-300 rounded-lg text-xs p-2 focus:ring-indigo-500 focus:border-indigo-500">
                                   </div>
-                                  <div>
-                                      <label class="block text-xs font-bold text-gray-700 mb-1">Toleransi Maks</label>
-                                      <input type="time" id="conf_toleransi_masuk" name="jam_toleransi_masuk" required class="w-full border-gray-300 rounded-lg text-xs p-2 focus:ring-red-500 focus:border-red-500">
-                                  </div>
                               </div>
-                              <p class="text-[10px] text-orange-500 mt-1.5"><i class="fas fa-info-circle"></i> Lewat <b>Batas Terlambat</b> status: Terlambat. Lewat <b>Toleransi Maks</b>: ditolak.</p>
+                              <p class="text-[10px] text-orange-500 mt-1.5"><i class="fas fa-info-circle"></i> Lewat <b>Batas Terlambat</b> status: Terlambat.</p>
                           </div>
 
                           <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
@@ -2262,7 +2258,6 @@ function renderGuruDashboardData(data, myClass) {
     function applyConfigToForm(conf) {
         document.getElementById('conf_masuk_mulai').value = conf.jam_masuk_mulai;
         document.getElementById('conf_masuk_akhir').value = conf.jam_masuk_akhir;
-        document.getElementById('conf_toleransi_masuk').value = conf.jam_toleransi_masuk;
         document.getElementById('conf_pulang_mulai').value = conf.jam_pulang_mulai;
         document.getElementById('conf_pulang_akhir').value = conf.jam_pulang_akhir;
     }
@@ -2279,7 +2274,6 @@ function renderGuruDashboardData(data, myClass) {
         const newConfig = {
             jam_masuk_mulai: formData.get('jam_masuk_mulai'),
             jam_masuk_akhir: formData.get('jam_masuk_akhir'),
-            jam_toleransi_masuk: formData.get('jam_toleransi_masuk'),
             jam_pulang_mulai: formData.get('jam_pulang_mulai'),
             jam_pulang_akhir: formData.get('jam_pulang_akhir')
         };
