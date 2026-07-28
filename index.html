@@ -1089,6 +1089,10 @@
                             <label class="block text-xs font-bold text-gray-700 mb-1">Teks Footer</label>
                             <input type="text" id="set_footer" class="w-full border-gray-300 rounded-lg text-xs p-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="School System">
                           </div>
+                          <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Nama Sekolah (Kartu Pelajar)</label>
+                            <input type="text" id="set_sekolah" class="w-full border-gray-300 rounded-lg text-xs p-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Sekolah Negeri Bengkulu">
+                          </div>
                         </div>
                         <div class="flex items-center gap-3 mt-6">
                           <button type="submit" id="btnSavePengaturan" class="bg-indigo-600 text-white px-5 py-2 rounded-lg text-xs font-bold shadow-sm hover:bg-indigo-700 transition flex items-center">
@@ -1747,6 +1751,7 @@ function processTableData(type) {
                 document.getElementById('set_warna_text').value = s.app_warna || '#1A1967';
                 document.getElementById('set_logo').value = s.app_logo_url || '';
                 document.getElementById('set_footer').value = s.app_footer || '';
+                document.getElementById('set_sekolah').value = s.app_sekolah || 'Sekolah Negeri Bengkulu';
                 updatePreview();
             }
         }).catch(function() { hideLoading(); });
@@ -1784,7 +1789,8 @@ function processTableData(type) {
             app_nama: document.getElementById('set_nama').value.trim(),
             app_warna: document.getElementById('set_warna_text').value.trim() || '#1A1967',
             app_logo_url: document.getElementById('set_logo').value.trim(),
-            app_footer: document.getElementById('set_footer').value.trim()
+            app_footer: document.getElementById('set_footer').value.trim(),
+            app_sekolah: document.getElementById('set_sekolah').value.trim()
         };
         showLoading();
         callGAS('saveAppSettings', data).then(function(result) {
@@ -3102,7 +3108,7 @@ function loadQRCodeSiswa(nisnParam, namaParam, kelasParam) {
                     <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white text-center relative overflow-hidden">
                         <div class="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-10 -mt-10 blur-xl"></div>
                         <h2 class="text-2xl font-bold tracking-tight">KARTU PELAJAR</h2>
-                        <p class="text-xs tracking-[0.2em] uppercase opacity-80 mt-1">Sekolah Negeri Bengkulu</p>
+                        <p class="text-xs tracking-[0.2em] uppercase opacity-80 mt-1">${(appCache.get('appSettings')||{}).app_sekolah||'Sekolah Negeri Bengkulu'}</p>
                     </div>
             
                     <div class="p-8 text-center bg-gray-50">
@@ -3143,8 +3149,9 @@ function loadQRCodeSiswa(nisnParam, namaParam, kelasParam) {
     }
 
     function cetakKartu(nama, nisn, kelas) {
+        var settings = appCache.get('appSettings') || {};
         var appNama = document.querySelector('#sidebarHeader h1')?.textContent || 'E-ABSENSI';
-        var appFooter = document.querySelector('#sidebarHeader p')?.textContent || '';
+        var appSekolah = settings.app_sekolah || 'Sekolah Negeri Bengkulu';
         var w = window.open('', '_blank');
         w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Cetak Kartu - ' + nama + '</title>');
         w.document.write('<style>');
@@ -3163,7 +3170,7 @@ function loadQRCodeSiswa(nisnParam, namaParam, kelasParam) {
         w.document.write('</style>');
         w.document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>');
         w.document.write('</head><body><div class="card">');
-        w.document.write('<div class="header"><h2>KARTU PELAJAR</h2><p>' + (appFooter || 'Sekolah Negeri Bengkulu') + '</p></div>');
+        w.document.write('<div class="header"><h2>KARTU PELAJAR</h2><p>' + appSekolah + '</p></div>');
         w.document.write('<div class="body"><div class="qr-wrap"><div id="qrcode"></div></div>');
         w.document.write('<div class="nama">' + nama + '</div>');
         w.document.write('<div class="nisn">' + nisn + '</div>');
